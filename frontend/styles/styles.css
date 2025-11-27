@@ -328,3 +328,12 @@ article h3 a:hover {
     font-weight: bold;
     color: #d32f2f;
 }
+
+.more-info {
+    display: none; /* ЦЕЙ РЯДОК ПРИХОВУЄ БЛОК */
+    margin-top: 15px;
+    padding: 10px;
+    border-left: 3px solid #00796b;
+    background-color: #f9fff9;
+    font-size: 0.95em;
+}
