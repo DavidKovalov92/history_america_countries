@@ -270,3 +270,61 @@ article h3 a:hover {
     font-weight: bold;
     color: #d32f2f; /* Червоний для дізлайків */
 }
+
+
+.feedback-widget {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.like-btn {
+    background: none;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.like-btn:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+
+/* Стиль, коли кнопка відключена (вже проголосована) */
+/* Стиль, коли кнопка відключена (вже проголосована) */
+.like-btn:disabled, .like-btn.voted {
+    cursor: default;
+    /* ВИДАЛЕНО: opacity: 0.6; - щоб кнопка не блідла */
+    opacity: 1; /* Встановлюємо повну прозорість */
+    border-color: #00796b; /* Виділяємо рамку зеленим (як основний колір) */
+}
+
+/* Виділення, якщо кнопка лайка була натиснута */
+.like-btn[data-action="like"].voted {
+    /* ВИДАЛЕНО: background-color: #e6ffe6; - прибираємо зелений фон */
+    background-color: white; /* Повертаємо білий фон */
+    border-color: #00796b;
+    color: #00796b; /* Робимо сам емодзі/текст зеленим, щоб показати вибір */
+}
+
+/* Виділення, якщо кнопка дізлайка була натиснута */
+.like-btn[data-action="dislike"].voted {
+    /* ВИДАЛЕНО: background-color: #ffe6e6; - прибираємо червоний фон */
+    background-color: white; /* Повертаємо білий фон */
+    border-color: #d32f2f;
+    color: #d32f2f; /* Робимо сам емодзі/текст червоним, щоб показати вибір */
+}
+
+.like-count {
+    font-weight: bold;
+    color: #00796b;
+}
+
+.dislike-count {
+    font-weight: bold;
+    color: #d32f2f;
+}
