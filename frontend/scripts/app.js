@@ -1,6 +1,3 @@
-// scripts/app.js
-
-// --- ГЛОБАЛЬНІ ЗМІННІ ---
 let currentQuizData = null;
 let userName = '';
 
@@ -37,79 +34,7 @@ let counters = loadCounters();
 let userVotes = loadUserVotes();
 
 // ====================================
-// ЛОГІКА КВІЗУ
-// (showSection та функції навігації видалені, щоб уникнути конфлікту)
-// ====================================
-
-function renderQuiz(country) {
-    if (typeof quizData === 'undefined') {
-        console.error("Помилка: quizData не визначено. Перевірте підключення quiz_data.js");
-        return;
-    }
-    
-    currentQuizData = quizData[country]; 
-    const quizQuestionsDiv = document.getElementById('quiz-questions');
-    const quizTitle = document.getElementById('quiz-title');
-    
-    quizTitle.textContent = `Квіз: ${country === 'brazil' ? 'Бразилія 🇧🇷' : 'Куба 🇨🇺'}`;
-    quizQuestionsDiv.innerHTML = '';
-
-    currentQuizData.forEach((item, index) => {
-        const qElement = document.createElement('div');
-        qElement.classList.add('question-block');
-        qElement.innerHTML = `
-            <h4>${item.question}</h4>
-            <div class="options-group" data-question-index="${index}">
-                ${item.options.map(option => `
-                    <label>
-                        <input type="radio" name="q${index}" value="${option}">
-                        ${option}
-                    </label>
-                `).join('<br>')}
-            </div>
-        `;
-        quizQuestionsDiv.appendChild(qElement);
-    });
-
-    document.getElementById('submit-quiz').style.display = 'block';
-}
-
-function calculateScore() {
-    if (!currentQuizData) return;
-    let score = 0;
-    
-    currentQuizData.forEach((item, index) => {
-        const selector = `input[name="q${index}"]:checked`;
-        const selectedInput = document.querySelector(selector);
-        
-        if (selectedInput && selectedInput.value === item.answer) {
-            score++;
-        }
-    });
-
-    const finalScore = {
-        name: userName,
-        country: currentQuizData === quizData.brazil ? 'Бразилія' : 'Куба',
-        score: score,
-        total: currentQuizData.length,
-        date: new Date().toLocaleDateString('uk-UA'),
-        percentage: (score / currentQuizData.length) * 100
-    };
-
-    alert(`Тест завершено! ${finalScore.name}, Ваш результат: ${finalScore.score} з ${finalScore.total} (${finalScore.percentage.toFixed(0)}%)`);
-
-    const leaderboard = loadLeaderboard();
-    leaderboard.push(finalScore);
-    
-    leaderboard.sort((a, b) => b.percentage - a.percentage || b.score - a.score);
-    
-    saveLeaderboard(leaderboard);
-    renderLeaderboard();
-    // showSection('leaderboard'); // ВИДАЛЕНО
-}
-
-// ====================================
-// ТАБЛИЦЯ ЛІДЕРІВ
+// ЛОГІКА КВІЗУ та ЛІДЕРБОРДУ (ЗАЛИШАЄМО ТІЛЬКИ ДАНІ)
 // ====================================
 
 function renderLeaderboard() {
@@ -135,9 +60,10 @@ function renderLeaderboard() {
     });
 }
 
+// ... (renderQuiz, calculateScore, showSection — ВИДАЛЕНО, щоб не було помилок) ...
+
 // ====================================
 // ФУНКЦІОНАЛ ЛАЙКІВ/ДИЗЛАЙКІВ
-// (Залишено, оскільки він не конфліктує з відображенням)
 // ====================================
 
 function updateDisplay(eventId, counters) {
@@ -217,13 +143,32 @@ function initializeFeedbackWidgets() {
     });
 }
 
+function initializeReadMore() {
+    document.querySelectorAll('.read-more-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); 
+            const targetId = this.getAttribute('data-target');
+            const targetElement = document.getElementById(targetId);
+            const buttonText = this.querySelector('strong');
+            
+            if (targetElement.style.display === 'block') {
+                targetElement.style.display = 'none';
+                buttonText.textContent = 'Читати детальніше...';
+            } else {
+                targetElement.style.display = 'block';
+                buttonText.textContent = 'Сховати деталі';
+            }
+        });
+    });
+}
+
 
 // ====================================
 // ІНІЦІАЛІЗАЦІЯ (DOM READY)
 // ====================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. КАРТА
+    // 1. КАРТА (Ініціалізація карти)
     const mapElement = document.getElementById('interactive-map');
     if (mapElement) {
         var map = L.map('interactive-map').setView([-10, -60], 3); 
@@ -240,31 +185,62 @@ document.addEventListener('DOMContentLoaded', () => {
         L.marker([-23.5505, -46.6333]).addTo(map).bindPopup('<strong>6. Сан-Паулу</strong>');
     }
     
-    // 2. ІНІЦІАЛІЗАЦІЯ ЛАЙКІВ
+    // 2. ІНІЦІАЛІЗАЦІЯ ФУНКЦІОНАЛУ
     initializeFeedbackWidgets();
+    initializeReadMore(); 
+    renderLeaderboard(); // Відображаємо лідерборд, якщо він є в DOM
     
-    // 3. ОБРОБНИКИ НАВІГАЦІЇ КВІЗУ (залишаємо, але вони не приховують контент)
+    // 3. ОБРОБНИКИ НАВІГАЦІЇ КВІЗУ (Залишаємо тільки необхідне)
     
-    // Кнопка 'Квіз' у хедері
+    // Кнопка 'Квіз' у хедері: Показуємо екран реєстрації та приховуємо main-content
     document.getElementById('show-quiz-btn').addEventListener('click', (e) => {
         e.preventDefault();
-        // showSection('quiz-start-screen'); // ВИДАЛЕНО
+        document.getElementById('main-content').style.display = 'none';
+        showSection('quiz-start-screen');
     });
     
-    // Кнопка 'Назад до контенту' (з екрану реєстрації)
+    // Кнопка 'Назад до контенту' (з екрану квізу): Повертаємо на головний контент
     document.getElementById('show-main-content-btn').addEventListener('click', (e) => {
         e.preventDefault();
+        showSection('main-content');
         window.scrollTo(0, 0); 
     });
     
     // Кнопка 'Розпочати Квіз'
     document.querySelectorAll('.start-quiz-btn').forEach(button => {
         button.addEventListener('click', () => {
-            // ... (тут логіка квізу залишиться, але не буде приховувати секції)
+            const nameInput = document.getElementById('user-name');
+            userName = nameInput.value.trim();
+            const errorDiv = document.getElementById('name-error');
+
+            if (userName.length < 3) {
+                errorDiv.style.display = 'block';
+                nameInput.focus();
+                return;
+            }
+            errorDiv.style.display = 'none';
+
+            const country = button.getAttribute('data-country');
+            
+            showSection('quiz-container');
+            renderQuiz(country);
         });
     });
 
-    // ... (інші обробники) ...
+    // Кнопка 'Завершити Квіз'
+    document.getElementById('submit-quiz').addEventListener('click', calculateScore);
     
-    // ПОЧАТКОВА АКТИВАЦІЯ: ВИДАЛЕНО, тому що контент вже має бути видимим.
+    // Кнопка 'Скасувати та вийти' (з екрана квізу)
+    document.getElementById('cancel-quiz-btn').addEventListener('click', () => {
+        showSection('quiz-start-screen');
+    });
+    
+    // Кнопка 'Назад' з лідерборду
+    document.getElementById('leaderboard-back-btn').addEventListener('click', () => {
+        showSection('quiz-start-screen');
+    });
+    
+    // ІНІЦІАЛІЗАЦІЯ ГОЛОВНОГО ЕКРАНА: Показуємо основний контент
+    // (Це важлива дія, але оскільки в HTML є style="display: block;", вона тут не потрібна для відображення, а лише для логіки)
+    // showSection('main-content'); // Видалено, щоб не конфліктувати з початковим display: block
 });
