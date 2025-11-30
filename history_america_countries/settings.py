@@ -132,15 +132,18 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Додайте цей список, щоб Django бачив вашу нову папку
-if DEBUG:
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    # Це налаштування для стиснення та кешування файлів (для максимальної швидкості)
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# 1. STATIC_ROOT: Куди збирати файли (потрібно і для Docker, і для Railway)
+# Це папка призначення (Destination)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# 2. STATICFILES_DIRS: Де лежать ваші файли (потрібно ЗАВЖДИ)
+# Це папка джерела (Source)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# 3. Налаштування WhiteNoise для стиснення та кешування
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
