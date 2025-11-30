@@ -116,13 +116,6 @@
                             <a href="{% url 'period_detail' period.id %}">детальну сторінку</a>.
                         </p>
                     </div>
-
-                    <div class="feedback-widget" data-event-id="event-{{ period.id }}">
-                        <button class="like-btn" data-action="like">👍</button>
-                        <span id="event-{{ period.id }}-likes" class="like-count">{{ period.description.likes }}</span>
-                        <button class="like-btn" data-action="dislike">👎</button>
-                        <span id="event-{{ period.id }}-dislikes" class="dislike-count">{{ period.description.dislikes }}</span>
-                    </div>
                 </article>
                 {% endfor %}
             </div>
@@ -136,7 +129,9 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Історичний Проєкт.Робив Івашко Ілля і Ковальов Давід</p>
+        <center>
+            <p>&copy; 2025 Історичний Проєкт.Робив Івашко Ілля і Ковальов Давід</p>
+        </center>
     </footer>
 
     <script>

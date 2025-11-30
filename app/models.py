@@ -29,10 +29,6 @@ class HistoricalPeriodEvents(models.Model):
     # Це поле для кнопки "Читати детальніше..." (повний текст статті)
     detail = models.TextField(verbose_name="Повний текст статті", blank=True)
 
-    # На скріншоті: Лайки та Дизлайки
-    likes = models.PositiveIntegerField(default=0, verbose_name="Лайки")
-    dislikes = models.PositiveIntegerField(default=0, verbose_name="Дизлайки")
-
 class HistoricalPeriod(models.Model):
     """
     Модель для кожного блоку історії (Ера Варгаса, Військовий режим тощо)
