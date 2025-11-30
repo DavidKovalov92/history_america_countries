@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вікторина</title>
+    <style>
+        /* Стилі залишаються ті самі, що ви скидали */
+        :root {
+            --card-bg: #ffffff;
+            --main-text: #333333;
+            --header-blue: #104e7e;
+            --accent-teal: #00796b;
+            --accent-hover: #004d40;
+            --bg-color: #f4f7f6;
+            --correct-green: #2e7d32;
+            --wrong-red: #c62828;
+            --neutral-border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--main-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #777;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-teal);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        h2.question-text {
+            color: var(--header-blue);
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid var(--neutral-border);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1em;
+            color: var(--main-text);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--header-blue);
+            background-color: #f8fbff;
+        }
+
+        .option-btn.correct {
+            background-color: #e8f5e9;
+            border-color: var(--correct-green);
+            color: var(--correct-green);
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #ffebee;
+            border-color: var(--wrong-red);
+            color: var(--wrong-red);
+            opacity: 0.7;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .next-btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--header-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            display: none;
+        }
+
+        .next-btn:hover {
+            opacity: 0.9;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .score-big {
+            font-size: 3em;
+            color: var(--accent-teal);
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .btn-home {
+            background-color: var(--accent-teal);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+
+    <div id="quiz-screen">
+        <div class="quiz-header">
+            <span id="question-count">Завантаження...</span>
+            <span id="score-display">Бали: 0</span>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <h2 class="question-text" id="question">Зачекайте...</h2>
+
+        <div class="options-grid" id="options-container">
+            </div>
+
+        <button class="next-btn" id="next-btn">Наступне питання →</button>
+    </div>
+
+    <div id="result-screen" class="result-screen">
+        <h2>🎉 Тест завершено!</h2>
+        <p>Ваш результат:</p>
+        <div class="score-big" id="final-score">0</div>
+        <p id="result-message">Непогано!</p>
+        <br>
+        <a href="/questions/leaderboard/" class="btn-home">Таблиця лідерів</a>
+    </div>
+
+</div>
+
+<script>
+    // 1. ОТРИМУЄМО ДАНІ З DJANGO
+    // Ми беремо JSON, який передали з views.py, і перетворюємо його в JavaScript об'єкт
+    let questions = [];
+    try {
+        const rawData = '{{ questions_json|escapejs }}';
+        if (rawData) {
+            questions = JSON.parse(rawData);
+        }
+    } catch (e) {
+        console.error("Помилка при читанні JSON:", e);
+    }
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('question');
+    const optionsContainer = document.getElementById('options-container');
+    const nextBtn = document.getElementById('next-btn');
+    const countEl = document.getElementById('question-count');
+    const scoreEl = document.getElementById('score-display');
+    const progressBar = document.getElementById('progress-bar');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const finalScoreEl = document.getElementById('final-score');
+    const resultMessageEl = document.getElementById('result-message');
+
+    function loadQuestion() {
+        if (!questions || questions.length === 0) {
+            questionEl.innerText = "Питань в базі даних не знайдено! Додайте їх через адмінку або команду.";
+            countEl.innerText = "";
+            return;
+        }
+
+        const currentData = questions[currentQuestionIndex];
+
+        questionEl.innerText = currentData.question;
+        countEl.innerText = `Питання ${currentQuestionIndex + 1} з ${questions.length}`;
+
+        // Оновлюємо прогрес
+        const progress = ((currentQuestionIndex) / questions.length) * 100;
+        progressBar.style.width = `${progress}%`;
+
+        optionsContainer.innerHTML = '';
+        nextBtn.style.display = 'none';
+
+        // Створюємо кнопки варіантів
+        currentData.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.innerText = option;
+            btn.classList.add('option-btn');
+
+            // Додаємо обробник кліку
+            btn.addEventListener('click', () => selectAnswer(index, currentData.correct));
+
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(selectedIndex, correctIndex) {
+        const buttons = optionsContainer.children;
+        // Блокуємо всі кнопки
+        for (let btn of buttons) {
+            btn.disabled = true;
+        }
+
+        if (selectedIndex === correctIndex) {
+            buttons[selectedIndex].classList.add('correct');
+            score += 100;
+            scoreEl.innerText = `Бали: ${score}`;
+        } else {
+            buttons[selectedIndex].classList.add('wrong');
+            // Показуємо, який був правильний
+            if (correctIndex >= 0 && correctIndex < buttons.length) {
+                buttons[correctIndex].classList.add('correct');
+            }
+        }
+
+        nextBtn.style.display = 'block';
+    }
+
+    nextBtn.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    });
+
+    function finishQuiz() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+
+        finalScoreEl.innerText = score;
+
+        if (score === questions.length * 100) {
+            resultMessageEl.innerText = "Ідеально! 🎓";
+        } else if (score > 0) {
+            resultMessageEl.innerText = "Хороший результат! 👍";
+        } else {
+            resultMessageEl.innerText = "Треба ще почитати... 📚";
+        }
+
+        // ВІДПРАВЛЯЄМО БАЛИ НА СЕРВЕР
+        fetch("{% url 'save_score' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ score: score })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Результат збережено:", data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Запускаємо тест
+    loadQuestion();
+</script>
+
+</body>
+</html>

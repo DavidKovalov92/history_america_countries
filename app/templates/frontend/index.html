@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Історія Латинської Америки</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- ДОДАНО: Стилі для мобільної адаптації -->
+    <style>
+        /* Базове налаштування, щоб відступи не ламали ширину */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Адаптивність зображень: щоб прапори не вилазили за екран */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Мобільні стилі (спрацьовують на екранах вужче 768px) */
+        @media (max-width: 768px) {
+            /* Шапка сайту: логотип і меню стають у стовпчик */
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px;
+            }
+
+            .main-nav ul {
+                flex-direction: column; /* Вертикальний список */
+                padding: 0;
+                margin-top: 15px;
+            }
+
+            .main-nav li {
+                margin: 10px 0; /* Більший відступ між посиланнями для пальців */
+            }
+
+            /* Зменшуємо відступи в основних секціях */
+            .country-section, #intro, #map {
+                padding: 15px;
+                margin: 10px 0;
+            }
+
+            .content-wrapper {
+                padding: 0;
+            }
+
+            /* Карта на телефоні має бути меншою, щоб не займати весь екран */
+            #interactive-map {
+                height: 300px !important; /* Перебиває інлайн стиль 500px */
+            }
+
+            /* Кнопки лайків/дизлайків робимо зручнішими */
+            .feedback-widget {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 15px;
+            }
+
+            .like-btn {
+                padding: 10px 20px; /* Більша область натискання */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <a href="{% url 'index' %}" class="logo">
+                <span class="logo-text">Постколоніальна Епоха</span>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#intro">Вступ</a></li>
+                    {% for country in countries %}
+                        <li><a href="#country-{{ country.id }}">{{ country.main_title }}</a></li>
+                    {% endfor %}
+                    <li><a href="#map">Карта</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section id="intro">
+            <h2>🌍 Вступ: Латинська Америка після 1945</h2>
+        </section>
+
+        {% for country in countries %}
+        <section id="country-{{ country.id }}" class="country-section">
+            <div class="content-wrapper">
+                {% if country.flag %}
+                    <img src="{{ country.flag.url }}" alt="Прапор {{ country.main_title }}" class="country-flag">
+                {% endif %}
+                <h2>{{ country.main_title }}</h2>
+
+                {% for period in country.periods.all %}
+                <article id="event-{{ period.id }}">
+                    <h3>{{ period.description.title }}</h3>
+                    <p>
+                        {{ period.description.short_description }}
+                        <a href="javascript:void(0)" class="read-more-btn" data-target="info-content-{{ period.id }}">
+                            <strong>Читати детальніше...</strong>
+                        </a>
+                    </p>
+
+                    <div id="info-content-{{ period.id }}" class="more-info" style="display: none;">
+                        <p><strong>Деталі:</strong> {{ period.description.detail }}</p>
+
+                        <p>Щоб отримати повну інформацію, перейдіть на
+                            <a href="{% url 'period_detail' period.id %}">детальну сторінку</a>.
+                        </p>
+                    </div>
+
+                    <div class="feedback-widget" data-event-id="event-{{ period.id }}">
+                        <button class="like-btn" data-action="like">👍</button>
+                        <span id="event-{{ period.id }}-likes" class="like-count">{{ period.description.likes }}</span>
+                        <button class="like-btn" data-action="dislike">👎</button>
+                        <span id="event-{{ period.id }}-dislikes" class="dislike-count">{{ period.description.dislikes }}</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+
+        <section id="map">
+            <h2>🗺️ Інтерактивна Карта</h2>
+            <div id="interactive-map" style="height: 500px;"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Історичний Проєкт.Робив Івашко Ілля і Ковальов Давід</p>
+    </footer>
+
+    <script>
+        // Leaflet setup (скорочено для прикладу)
+        var map = L.map('interactive-map').setView([-10, -60], 3);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OSM' }).addTo(map);
+
+        // МАРКЕРИ КАРТИ (залишається без змін)
+        L.marker([-15.7797, -47.9297]).addTo(map).bindPopup('<strong>1. Бразиліа</strong><br>Нова столиця, символ модернізації.');
+        L.marker([-22.9068, -43.1729]).addTo(map).bindPopup('<strong>2. Ріо-де-Жанейро</strong><br>Центр політичних подій.');
+        L.marker([23.1136, -82.3666]).addTo(map).bindPopup('<strong>3. Гавана</strong><br>Епіцентр Кубинської революції.');
+        L.marker([22.36, -81.16]).addTo(map).bindPopup('<strong>4. Затока Свиней</strong><br>Місце невдалого вторгнення (1961).');
+        L.marker([20.0083, -75.8267]).addTo(map).bindPopup('<strong>5. Сантьяго-де-Куба</strong><br>Місце початку Кубинської революції.');
+        L.marker([-23.5505, -46.6333]).addTo(map).bindPopup('<strong>6. Сан-Паулу</strong><br>Головний промисловий центр.');
+        // JS для кнопок "Читати детальніше"
+        document.querySelectorAll('.read-more-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const buttonText = this.querySelector('strong');
+
+                if (targetElement.style.display === 'block') {
+                    targetElement.style.display = 'none';
+                    buttonText.textContent = 'Читати детальніше...';
+                } else {
+                    targetElement.style.display = 'block';
+                    buttonText.textContent = 'Сховати деталі';
+                }
+            });
+        });
+
+        // Тут потрібен ваш код для лайків.
+        // Примітка: Зараз він працює через LocalStorage.
+        // Для збереження в БД Django потрібно використовувати AJAX (fetch).
+    </script>

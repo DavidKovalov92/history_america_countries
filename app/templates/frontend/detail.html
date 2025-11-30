@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ detail.historical_title|default:period.description.title }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+    <style>
+        /* Додаткові стилі, щоб виглядало як на скріншоті */
+        .timeline-list {
+            list-style: none;
+            padding: 0;
+        }
+        .timeline-list li {
+            margin-bottom: 25px;
+        }
+        .event-title {
+            color: #0056b3; /* Синій колір заголовків як на фото */
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .event-desc {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #333;
+        }
+    </style>
+</head>
+<body class="detail-page">
+
+    <header>
+        <a href="{% url 'index' %}" class="back-link">⬅️ На головну сторінку</a>
+    </header>
+
+    <main>
+        {% if detail %}
+            <h1>{{ detail.historical_title|default:period.description.title }}</h1>
+            <p class="intro-text">{{ detail.description }}</p>
+
+            <div class="image-container">
+                <p class="caption"><em>{{ detail.quote }}</em></p>
+            </div>
+
+            <section class="events-section">
+                <h2>{{ detail.historical_title }}</h2>
+
+                {% if detail.historical_context.all %}
+                <ul class="timeline-list">
+                    {% for item in detail.historical_context.all %}
+                    <li>
+                        <div class="event-title">{{ item.title }}</div>
+                        <div class="event-desc">{{ item.description }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                    <p>Інформація про ключові події відсутня.</p>
+                {% endif %}
+            </section>
+
+        {% else %}
+            <p>Детальна інформація для цього періоду ще не додана.</p>
+            <p>{{ period.description.detail }}</p>
+        {% endif %}
+        <center>
+            <a class="back-link" href="{% url 'login' %}">Quiz test</a>
+        </center>
+    </main>
+
+    <footer>
+        {% if detail and detail.source %}
+            <p>Джерело: {{ detail.source }}</p>
+        {% endif %}
+    </footer>
+
+</body>
+</html>
