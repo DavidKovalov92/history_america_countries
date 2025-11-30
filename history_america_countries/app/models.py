@@ -111,3 +111,7 @@ class Answer(models.Model):
 
     # ПРАВИЛЬНІСТЬ:
     is_correct = models.BooleanField(default=False, verbose_name="Це правильна відповідь?")
+
+class User(models.Model):
+    username = models.CharField(default="Unnamed")
+    score = models.IntegerField(default=0)

@@ -7,7 +7,8 @@ from .models import (
     HistoricalSupplement,
     HistoricalPeriodDetail,
     Question,
-    Answer
+    Answer,
+    User
 )
 
 
@@ -109,3 +110,7 @@ class CountryAdmin(admin.ModelAdmin):
         return "Немає фото"
 
     flag_preview.short_description = "Прапор"
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'score')

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід у гру</title>
+    <style>
+        /* Ті самі змінні, що і в таблиці лідерів */
+        :root {
+            --card-bg: #ffffff;
+            --main-text: #333333;
+            --header-blue: #104e7e;   /* Основний синій */
+            --accent-teal: #00796b;   /* Основний бірюзовий (для кнопок) */
+            --accent-hover: #004d40;  /* Темніший бірюзовий для ховера */
+            --input-border: #ccc;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--main-text);
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Центруємо по вертикалі */
+            min-height: 100vh;   /* На весь екран */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px; /* Вужча картка для форми входу */
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--header-blue);
+            margin-bottom: 10px;
+            font-size: 1.8em;
+            margin-top: 0;
+        }
+
+        p.subtitle {
+            color: #777;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--header-blue);
+            font-size: 0.9em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 2px solid var(--input-border);
+            border-radius: 6px;
+            box-sizing: border-box; /* Щоб padding не ламав ширину */
+            transition: border-color 0.3s ease;
+            outline: none;
+            color: var(--main-text);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-teal);
+        }
+
+        .btn-continue {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-teal);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-continue:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-continue:active {
+            transform: scale(0.98);
+        }
+
+        /* Іконка (опціонально, можна прибрати) */
+        .icon-wrapper {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="icon-wrapper">🌎</div>
+    <h1>Quiz test </h1>
+    <p class="subtitle">Введіть своє ім'я, щоб перейти до тесту</p>
+
+    <form method="post" id="loginForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Ваш Нікнейм</label>
+            <input type="text" id="username" name="username" placeholder="Наприклад: YouAreGay" required autocomplete="off">
+        </div>
+
+        <button type="submit" class="btn-continue">Продовжити</button>
+    </form>
+</div>
+
+</body>
+</html>
