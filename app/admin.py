@@ -81,7 +81,7 @@ class HistoricalPeriodAdmin(admin.ModelAdmin):
 
 @admin.register(HistoricalPeriodEvents)
 class HistoricalPeriodEventsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'short_desc_preview', 'likes')
+    list_display = ('title', 'short_desc_preview',)
     search_fields = ('title',)  # Це потрібно для autocomplete_fields
 
     def short_desc_preview(self, obj):
